@@ -1,0 +1,45 @@
+{
+  "author": "Jim Neuendorf",
+  "name": "JsUml",
+  "description": "Automatic generation of plantUML code",
+  "contributors": [
+    {
+      "name": "Jim Neuendorf",
+      "email": "jim.neuendorf@gmx.de"
+    }
+  ],
+  "version": "0.0.1",
+  "keywords": [
+    "inheritance",
+    "multiple inheritance",
+    "coffeescript",
+    "coffee",
+    "plantUML",
+    "uml"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jneuendorf/JsUml"
+  },
+  "engines": {
+    "node": ">=0.10"
+  },
+  "dependencies": {
+    "coffee-script": "latest",
+    "heterarchy": ">=1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "coffee-coverage": "0.6",
+    "coffeelint": "^1.15.7",
+    "coveralls": "2.10.0",
+    "docco": ">=0.6",
+    "istanbul": "0.3.5",
+    "mocha": "^2.2.5"
+  },
+  "files": [
+    "js_uml.js"
+  ],
+  "main": "js_uml.js",
+  "license": "MIT"
+}
