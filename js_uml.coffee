@@ -9,9 +9,6 @@ else if typeof global isnt "undefined"
     _global = global
 
 
-is_class = (obj) ->
-    return typeof(obj) is "function" and obj.prototype?
-
 javaScriptClassNames = [
     "Array"
     "Boolean"
@@ -59,33 +56,83 @@ javaScriptClassNames = [
 javaScriptClasses = javaScriptClassNames.reduce(
     (classes, name) ->
         classes[_global[name]] = _global[name]
-        classes
+        return classes
     {}
 )
 isJavaScriptClass = (cls) ->
-    javaScriptClasses[cls] is cls
+    return javaScriptClasses[cls] is cls
+
+isClass = (obj) ->
+    return typeof(obj) is "function" and obj.prototype? and not isJavaScriptClass(obj)
+
+# # @param visitedClasses [Array] Accumulator
+# traverse = (classes) ->
+#     plantUml = ""
+#     for cls in classes
+#         # heterarchy's `extends multi(bases...)`
+#         if cls.__bases__?
+#             bases = cls.__bases__
+#         # CoffeeScript's normal `extends Class`
+#         else if cls.__super__
+#             bases = [cls.__super__.constructor]
+#         # no inheritance
+#         else
+#             bases = []
+#
+#         if bases.length > 0
+#             for base in bases
+#                 plantUml += "#{base.name} <|-- #{cls.name}\n"
+#             plantUml += traverse(bases)
+#     return plantUml
+
+namespaceId = 1
+getNamespaceName = (namespace) ->
+    return "namespace##{namespaceId++}"
+
+getNamespaceOfClass = (cls, tuples) ->
+    for tuple in tuples when tuple[0] is cls
+        return tuple[1]
+    return null
+
+exports.setNamespaceGetter = (getter) ->
+    getNamespaceName = getter
 
 # @param namespaces... [Object] The namespaces that will be checked for classes
 exports.generateUml = (namespaces...) ->
-    classes = []
+    classes = {}
+    classNamespaceTuples = []
+    classNames = []
+    duplicateClassNames = []
     for namespace in namespaces
-        for name, cls of namespace when is_class(cls) and cls not in classes
-            classes.push(cls)
+        namespaceName = getNamespaceName(namespace)
+        classes[namespaceName] = []
+        for name, cls of namespace when isClass(cls) and cls not in classes
+            classes[namespaceName].push(cls)
+            classNamespaceTuples.push([cls, namespaceName])
+            if name in classNames
+                duplicateClassNames.push(name)
+            classNames.push(name)
 
-    plant_uml = "@startuml\n"
-    for cls in classes
-        # heterarchy's `extends multi(bases...)`
-        if cls.__bases__?
-            bases = cls.__bases__
-        # CoffeeScript's normal `extends Class`
-        else if cls.__super__
-            bases = [cls.__super__.constructor]
-        # no inheritance
-        else
-            bases = []
+    plantUml = "@startuml\n"
 
-        for base in bases
-            plant_uml += "#{base.name} <|-- #{cls.name}\n"
+    for namespaceName, classList of classes
+        for cls in classList
+            # heterarchy's `extends multi(bases...)`
+            if cls.__bases__?
+                bases = cls.__bases__
+            # CoffeeScript's normal `extends Class`
+            else if cls.__super__
+                bases = [cls.__super__.constructor]
+            # no inheritance
+            else
+                bases = []
 
-    plant_uml += "@enduml"
-    console.log(plant_uml)
+            for base in bases
+                if base.name in duplicateClassNames
+                    namespaceName = getNamespaceOfClass(base, classNamespaceTuples)
+                    if namespaceName?
+                        plantUml += "#{namespaceName}."
+                plantUml += "#{base.name} <|-- #{cls.name}\n"
+
+    plantUml += "@enduml"
+    console.log(plantUml)

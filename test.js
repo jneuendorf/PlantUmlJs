@@ -3,16 +3,20 @@
   var extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  window.Test = {};
+  window.namespace1 = {};
 
-  Test.A = (function() {
+  window.namespace2 = {};
+
+  window.namespace3 = {};
+
+  namespace1.A = (function() {
     function A() {}
 
     return A;
 
   })();
 
-  Test.B = (function(superClass) {
+  namespace1.B = (function(superClass) {
     extend(B, superClass);
 
     function B() {
@@ -21,9 +25,9 @@
 
     return B;
 
-  })(Test.A);
+  })(namespace1.A);
 
-  Test.C = (function(superClass) {
+  namespace1.C = (function(superClass) {
     extend(C, superClass);
 
     function C() {
@@ -32,9 +36,9 @@
 
     return C;
 
-  })(Test.A);
+  })(namespace1.A);
 
-  Test.D = (function(superClass) {
+  namespace1.D = (function(superClass) {
     extend(D, superClass);
 
     function D() {
@@ -43,8 +47,79 @@
 
     return D;
 
-  })(heterarchy.multi(Test.B, Test.C));
+  })(heterarchy.multi(namespace1.B, namespace1.C));
 
-  JsUml.generateUml(Test);
+  namespace1.E = (function(superClass) {
+    extend(E, superClass);
+
+    function E() {
+      return E.__super__.constructor.apply(this, arguments);
+    }
+
+    return E;
+
+  })(namespace1.A);
+
+  namespace1.F = (function(superClass) {
+    extend(F, superClass);
+
+    function F() {
+      return F.__super__.constructor.apply(this, arguments);
+    }
+
+    return F;
+
+  })(heterarchy.multi(namespace1.C, namespace1.E));
+
+  namespace1.G = (function(superClass) {
+    extend(G, superClass);
+
+    function G() {
+      return G.__super__.constructor.apply(this, arguments);
+    }
+
+    return G;
+
+  })(heterarchy.multi(namespace1.D, namespace1.F));
+
+  namespace2.A = (function() {
+    function A() {}
+
+    return A;
+
+  })();
+
+  namespace3.A = (function() {
+    function A() {}
+
+    return A;
+
+  })();
+
+  namespace1.X = (function(superClass) {
+    extend(X, superClass);
+
+    function X() {
+      return X.__super__.constructor.apply(this, arguments);
+    }
+
+    return X;
+
+  })(namespace3.A);
+
+  JsUml.setNamespaceGetter(function(namespace) {
+    if (namespace === window.namespace1) {
+      return "namespace1";
+    }
+    if (namespace === window.namespace2) {
+      return "namespace2";
+    }
+    if (namespace === window.namespace3) {
+      return "namespace3";
+    }
+    return "";
+  });
+
+  JsUml.generateUml(namespace1, namespace2);
 
 }).call(this);
