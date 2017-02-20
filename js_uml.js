@@ -112,7 +112,7 @@
       classList = classes[namespaceName];
       for (j = 0, len1 = classList.length; j < len1; j++) {
         cls = classList[j];
-        if ((cls.__bases__ != null) && cls.__bases__ !== ((ref = cls.__super__) != null ? ref.__bases__ : void 0)) {
+        if ((cls.__bases__ != null) && cls.__bases__ !== ((ref = cls.__super__) != null ? ref.constructor.__bases__ : void 0)) {
           bases = cls.__bases__;
         } else if (cls.__super__) {
           bases = [cls.__super__.constructor];
