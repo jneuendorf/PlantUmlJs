@@ -84,7 +84,7 @@
   };
 
   exports.generateUml = function() {
-    var base, bases, classList, classNames, classNamespaceTuples, classes, cls, duplicateClassNames, i, j, k, len, len1, len2, name, namespace, namespaceName, namespaces, plantUml, plantUmlLine, plantUmlLines, ref;
+    var base, bases, classList, classNames, classNamespaceTuples, classes, cls, duplicateClassNames, i, j, k, len, len1, len2, name, namespace, namespaceName, namespaces, plantUml, plantUmlLine, plantUmlLines, ref, ref1;
     namespaces = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     classes = {};
     classNamespaceTuples = [];
@@ -112,7 +112,7 @@
       classList = classes[namespaceName];
       for (j = 0, len1 = classList.length; j < len1; j++) {
         cls = classList[j];
-        if (cls.__bases__ != null) {
+        if ((cls.__bases__ != null) && cls.__bases__ !== ((ref = cls.__super__) != null ? ref.__bases__ : void 0)) {
           bases = cls.__bases__;
         } else if (cls.__super__) {
           bases = [cls.__super__.constructor];
@@ -122,7 +122,7 @@
         for (k = 0, len2 = bases.length; k < len2; k++) {
           base = bases[k];
           plantUmlLine = "";
-          if (ref = base.name, indexOf.call(duplicateClassNames, ref) >= 0) {
+          if (ref1 = base.name, indexOf.call(duplicateClassNames, ref1) >= 0) {
             namespaceName = getNamespaceOfClass(base, classNamespaceTuples);
             if ((namespaceName != null ? namespaceName.length : void 0) > 0) {
               plantUmlLine += namespaceName + ".";
