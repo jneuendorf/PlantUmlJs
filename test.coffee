@@ -1,11 +1,12 @@
 if typeof window isnt "undefined"
     root = window
+    heterarchy = window.heterarchy
+    JsUml = window.JsUml
 else if typeof global isnt "undefined"
     root = global
-
-if require?
     heterarchy = require("heterarchy")
     JsUml = require("./js_uml.js")
+
 
 root.namespace1 = {}
 root.namespace2 = {}

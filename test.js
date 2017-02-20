@@ -6,11 +6,10 @@
 
   if (typeof window !== "undefined") {
     root = window;
+    heterarchy = window.heterarchy;
+    JsUml = window.JsUml;
   } else if (typeof global !== "undefined") {
     root = global;
-  }
-
-  if (typeof require !== "undefined" && require !== null) {
     heterarchy = require("heterarchy");
     JsUml = require("./js_uml.js");
   }
