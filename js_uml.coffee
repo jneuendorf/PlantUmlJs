@@ -132,7 +132,7 @@ exports.generateUml = (namespaces...) ->
     for namespaceName, classList of classes
         for cls in classList
             # heterarchy's `extends multi(bases...)`
-            if cls.__bases__? and cls.__bases__ isnt cls.__super__?.__bases__
+            if cls.__bases__? and cls.__bases__ isnt cls.__super__?.constructor.__bases__
                 bases = cls.__bases__
             # CoffeeScript's normal `extends Class`
             else if cls.__super__
