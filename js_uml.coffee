@@ -94,6 +94,20 @@ getNamespaceOfClass = (cls, tuples) ->
         return tuple[1]
     return null
 
+unique = (arr) ->
+    res = []
+    for e in arr when e not in res
+        res.push(e)
+    return res
+
+inheritsSelf = (line) ->
+    parts = line.split(/\s*\<\|\-\-\s*/)
+    return parts[0] is parts[1]
+
+# remove duplicates and `A <|-- A` like lines
+clean = (lines) ->
+    return (line for line in unique(lines) when not inheritsSelf(line))
+
 exports.setNamespaceGetter = (getter) ->
     getNamespaceName = getter
 
@@ -113,7 +127,7 @@ exports.generateUml = (namespaces...) ->
                 duplicateClassNames.push(name)
             classNames.push(name)
 
-    plantUml = "@startuml\n"
+    plantUmlLines = ["@startuml"]
 
     for namespaceName, classList of classes
         for cls in classList
@@ -128,11 +142,15 @@ exports.generateUml = (namespaces...) ->
                 bases = []
 
             for base in bases
+                plantUmlLine = ""
                 if base.name in duplicateClassNames
                     namespaceName = getNamespaceOfClass(base, classNamespaceTuples)
-                    if namespaceName?
-                        plantUml += "#{namespaceName}."
-                plantUml += "#{base.name} <|-- #{cls.name}\n"
+                    if namespaceName?.length > 0
+                        plantUmlLine += "#{namespaceName}."
+                plantUmlLine += "#{base.name} <|-- #{cls.name}"
+                plantUmlLines.push(plantUmlLine)
 
-    plantUml += "@enduml"
+    plantUmlLines.push("@enduml")
+    # make unique because x could inherit from 2 different A
+    plantUml = clean(plantUmlLines).join("\n")
     console.log(plantUml)
