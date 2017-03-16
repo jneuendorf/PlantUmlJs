@@ -29,11 +29,12 @@ class root.namespace1.X extends root.namespace3.A
 class root.namespace1.X extends heterarchy.multi(root.namespace3.A, root.namespace4.A)
 
 JsUml.setNamespaceGetter (namespace) ->
-    if namespace is root.namespace1
-        return "namespace1"
-    if namespace is root.namespace2
-        return "namespace2"
-    if namespace is root.namespace3
-        return "namespace3"
+    dict = [
+        [root.namespace1, "namespace1"]
+        [root.namespace2, "namespace2"]
+        [root.namespace3, "namespace3"]
+    ]
+    for tuple in dict when tuple[0] is namespace
+        return tuple[1]
     return ""
 JsUml.generateUml(namespace1, namespace2)

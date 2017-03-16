@@ -139,14 +139,13 @@
   })(heterarchy.multi(root.namespace3.A, root.namespace4.A));
 
   JsUml.setNamespaceGetter(function(namespace) {
-    if (namespace === root.namespace1) {
-      return "namespace1";
-    }
-    if (namespace === root.namespace2) {
-      return "namespace2";
-    }
-    if (namespace === root.namespace3) {
-      return "namespace3";
+    var dict, i, len, tuple;
+    dict = [[root.namespace1, "namespace1"], [root.namespace2, "namespace2"], [root.namespace3, "namespace3"]];
+    for (i = 0, len = dict.length; i < len; i++) {
+      tuple = dict[i];
+      if (tuple[0] === namespace) {
+        return tuple[1];
+      }
     }
     return "";
   });
