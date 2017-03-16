@@ -27,7 +27,9 @@
   exports.multi = function() {
     var bases;
     bases = 1 <= arguments.length ? slice.call(arguments, 0) : [];
-    return generate(merge(map(bases, mro).concat([bases])));
+    var cls = generate(merge(map(bases, mro).concat([bases])));
+    cls.__bases__ = bases;
+    return cls;
   };
 
   generate = memoize(function(linearization) {

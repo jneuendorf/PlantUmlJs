@@ -84,12 +84,10 @@
   };
 
   exports.generateUml = function() {
-    var base, bases, classList, classNames, classNamespaceTuples, classes, cls, duplicateClassNames, i, j, k, len, len1, len2, name, namespace, namespaceName, namespaces, plantUml, plantUmlLine, plantUmlLines, ref, ref1;
+    var base, baseNamespaceName, bases, classList, classNamespaceTuples, classes, cls, clsNamespaceName, i, j, k, len, len1, len2, name, namespace, namespaceName, namespaces, plantUml, plantUmlLine, plantUmlLines;
     namespaces = 1 <= arguments.length ? slice.call(arguments, 0) : [];
     classes = {};
     classNamespaceTuples = [];
-    classNames = [];
-    duplicateClassNames = [];
     for (i = 0, len = namespaces.length; i < len; i++) {
       namespace = namespaces[i];
       namespaceName = getNamespaceName(namespace);
@@ -101,41 +99,50 @@
         }
         classes[namespaceName].push(cls);
         classNamespaceTuples.push([cls, namespaceName]);
-        if (indexOf.call(classNames, name) >= 0) {
-          duplicateClassNames.push(name);
-        }
-        classNames.push(name);
       }
     }
-    plantUmlLines = ["@startuml"];
+    plantUmlLines = [];
+    console.log(classes);
     for (namespaceName in classes) {
       classList = classes[namespaceName];
       for (j = 0, len1 = classList.length; j < len1; j++) {
         cls = classList[j];
-        if ((cls.__bases__ != null) && cls.__bases__ !== ((ref = cls.__super__) != null ? ref.constructor.__bases__ : void 0)) {
+        if (cls.__bases__ != null) {
           bases = cls.__bases__;
-        } else if (cls.__super__) {
+        } else if (cls.__super__ != null) {
           bases = [cls.__super__.constructor];
         } else {
           bases = [];
         }
-        for (k = 0, len2 = bases.length; k < len2; k++) {
-          base = bases[k];
-          plantUmlLine = "";
-          if (ref1 = base.name, indexOf.call(duplicateClassNames, ref1) >= 0) {
-            namespaceName = getNamespaceOfClass(base, classNamespaceTuples);
-            if ((namespaceName != null ? namespaceName.length : void 0) > 0) {
-              plantUmlLine += namespaceName + ".";
-            }
+        if (bases.length > 0) {
+          for (k = 0, len2 = bases.length; k < len2; k++) {
+            base = bases[k];
+            plantUmlLine = "";
+            baseNamespaceName = getNamespaceOfClass(base, classNamespaceTuples);
+            clsNamespaceName = getNamespaceOfClass(cls, classNamespaceTuples);
+            plantUmlLine += "" + ((baseNamespaceName != null ? baseNamespaceName.length : void 0) > 0 ? baseNamespaceName + "." : "") + base.name + " <|-- " + ((clsNamespaceName != null ? clsNamespaceName.length : void 0) > 0 ? clsNamespaceName + "." : "") + cls.name;
+            plantUmlLines.push(plantUmlLine);
           }
-          plantUmlLine += base.name + " <|-- " + cls.name;
-          plantUmlLines.push(plantUmlLine);
+        } else {
+          clsNamespaceName = getNamespaceOfClass(cls, classNamespaceTuples);
+          plantUmlLines.push("class " + ((clsNamespaceName != null ? clsNamespaceName.length : void 0) > 0 ? clsNamespaceName + "." : "") + cls.name);
         }
       }
     }
-    plantUmlLines.push("@enduml");
-    plantUml = clean(plantUmlLines).join("\n");
-    return console.log(plantUml);
+    plantUmlLines.sort(function(a, b) {
+      var preA, preB;
+      preA = a.slice(0, 5);
+      preB = b.slice(0, 5);
+      if (preA === "class" && preB !== "class") {
+        return -1;
+      }
+      if (preA !== "class" && preB === "class") {
+        return 1;
+      }
+      return 0;
+    });
+    plantUml = "@startuml\nhide members\n" + (clean(plantUmlLines).join("\n")) + "\n@enduml";
+    return plantUml;
   };
 
 }).call(this);

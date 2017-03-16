@@ -115,42 +115,50 @@ exports.setNamespaceGetter = (getter) ->
 exports.generateUml = (namespaces...) ->
     classes = {}
     classNamespaceTuples = []
-    classNames = []
-    duplicateClassNames = []
     for namespace in namespaces
         namespaceName = getNamespaceName(namespace)
         classes[namespaceName] = []
         for name, cls of namespace when isClass(cls) and cls not in classes
             classes[namespaceName].push(cls)
             classNamespaceTuples.push([cls, namespaceName])
-            if name in classNames
-                duplicateClassNames.push(name)
-            classNames.push(name)
 
-    plantUmlLines = ["@startuml"]
+    plantUmlLines = []
 
+    console.log classes
     for namespaceName, classList of classes
         for cls in classList
             # heterarchy's `extends multi(bases...)`
-            if cls.__bases__? and cls.__bases__ isnt cls.__super__?.constructor.__bases__
+            if cls.__bases__? #and cls.__bases__ isnt cls.__super__?.constructor.__bases__
                 bases = cls.__bases__
             # CoffeeScript's normal `extends Class`
-            else if cls.__super__
+            else if cls.__super__?
                 bases = [cls.__super__.constructor]
             # no inheritance
             else
                 bases = []
 
-            for base in bases
-                plantUmlLine = ""
-                if base.name in duplicateClassNames
-                    namespaceName = getNamespaceOfClass(base, classNamespaceTuples)
-                    if namespaceName?.length > 0
-                        plantUmlLine += "#{namespaceName}."
-                plantUmlLine += "#{base.name} <|-- #{cls.name}"
-                plantUmlLines.push(plantUmlLine)
+            if bases.length > 0
+                for base in bases
+                    plantUmlLine = ""
+                    baseNamespaceName = getNamespaceOfClass(base, classNamespaceTuples)
+                    clsNamespaceName = getNamespaceOfClass(cls, classNamespaceTuples)
+                    plantUmlLine += "#{if baseNamespaceName?.length > 0 then "#{baseNamespaceName}." else ""}#{base.name} <|-- #{if clsNamespaceName?.length > 0 then "#{clsNamespaceName}." else ""}#{cls.name}"
+                    plantUmlLines.push(plantUmlLine)
+            # no bases => create class object (e.g. when cls is a superclass)
+            else
+                clsNamespaceName = getNamespaceOfClass(cls, classNamespaceTuples)
+                plantUmlLines.push("class #{if clsNamespaceName?.length > 0 then "#{clsNamespaceName}." else ""}#{cls.name}")
 
-    plantUmlLines.push("@enduml")
-    # make unique because x could inherit from 2 different A
-    plantUml = clean(plantUmlLines).join("\n")
-    console.log(plantUml)
+    # sort class declarations (without relations) to the top
+    plantUmlLines.sort (a, b) ->
+        preA = a.slice(0, 5)
+        preB = b.slice(0, 5)
+        if preA is "class" and preB isnt "class"
+            return -1
+        if preA isnt "class" and preB is "class"
+            return 1
+        return 0
+
+    # make unique because x could inherit from 2 different A (that are in invisible namespaces)
+    plantUml = "@startuml\nhide members\n#{clean(plantUmlLines).join("\n")}\n@enduml"
+    return plantUml
