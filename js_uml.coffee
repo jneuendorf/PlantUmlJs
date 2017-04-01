@@ -108,6 +108,19 @@ inheritsSelf = (line) ->
 clean = (lines) ->
     return (line for line in unique(lines) when not inheritsSelf(line))
 
+# sort class declarations (without relations) to the top
+sortClassDeclarationsToTop = (plantUmlLines) ->
+    plantUmlLines.sort (a, b) ->
+        preA = a.slice(0, 5)
+        preB = b.slice(0, 5)
+        if preA is "class" and preB isnt "class"
+            return -1
+        if preA isnt "class" and preB is "class"
+            return 1
+        return 0
+    return plantUmlLines
+
+
 exports.setNamespaceGetter = (getter) ->
     getNamespaceName = getter
 
@@ -124,7 +137,7 @@ exports.generateUml = (namespaces...) ->
 
     plantUmlLines = []
 
-    console.log classes
+    # console.log classes
     for namespaceName, classList of classes
         for cls in classList
             # heterarchy's `extends multi(bases...)`
@@ -149,16 +162,7 @@ exports.generateUml = (namespaces...) ->
                 clsNamespaceName = getNamespaceOfClass(cls, classNamespaceTuples)
                 plantUmlLines.push("class #{if clsNamespaceName?.length > 0 then "#{clsNamespaceName}." else ""}#{cls.name}")
 
-    # sort class declarations (without relations) to the top
-    plantUmlLines.sort (a, b) ->
-        preA = a.slice(0, 5)
-        preB = b.slice(0, 5)
-        if preA is "class" and preB isnt "class"
-            return -1
-        if preA isnt "class" and preB is "class"
-            return 1
-        return 0
-
+    sortClassDeclarationsToTop(plantUmlLines)
     # make unique because x could inherit from 2 different A (that are in invisible namespaces)
     plantUml = "@startuml\nhide members\n#{clean(plantUmlLines).join("\n")}\n@enduml"
     return plantUml

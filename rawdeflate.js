@@ -1,4 +1,6 @@
 /*
+ * https://github.com/dankogai/js-deflate
+ *
  * $Id: rawdeflate.js,v 0.5 2013/04/09 14:25:38 dankogai Exp $
  *
  * GNU General Public License, version 2 (GPL-2.0)
@@ -535,7 +537,7 @@ var zip_fill_window = function() {
 //	System.arraycopy(window, WSIZE, window, 0, WSIZE);
 	for(n = 0; n < zip_WSIZE; n++)
 	    zip_window[n] = zip_window[n + zip_WSIZE];
-      
+
 	zip_match_start -= zip_WSIZE;
 	zip_strstart    -= zip_WSIZE; /* we now have strstart >= MAX_DIST: */
 	zip_block_start -= zip_WSIZE;
@@ -821,7 +823,7 @@ var zip_qcopy = function(buff, off, buff_size) {
 //      System.arraycopy(qhead.ptr, qhead.off, buff, off + n, i);
 	for(j = 0; j < i; j++)
 	    buff[off + n + j] = zip_qhead.ptr[zip_qhead.off + j];
-	
+
 	zip_qhead.off += i;
 	zip_qhead.len -= i;
 	n += i;
